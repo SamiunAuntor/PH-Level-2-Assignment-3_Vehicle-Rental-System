@@ -12,19 +12,24 @@ The system consists of three core tables:
 
 ### Users
 Stores user account information with role-based access control.
-- **Primary Key**: `user_id`
-- **Fields**: `name`, `email` (unique), `password`, `phone_number`, `role` (Admin/Customer)
+- **Primary Key**: `user_id` (SERIAL)
+- **Fields**: `name` (varchar(100)), `email` (varchar(100), unique), `password` (varchar(255)), `phone` (varchar(20)), `role` (varchar(10), CHECK: 'admin' or 'customer'), `created_at` (timestamp)
+- **Constraints**: Email must be unique, role must be either 'admin' or 'customer'
 
 ### Vehicles
 Manages vehicle inventory and availability.
-- **Primary Key**: `vehicle_id`
-- **Fields**: `vehicle_name`, `vehicle_type` (car/bike/truck), `model`, `registration_number` (unique), `rental_price_per_day`, `availability_status` (available/rented/maintenance)
+- **Primary Key**: `vehicle_id` (SERIAL)
+- **Fields**: `vehicle_name` (varchar(100)), `vehicle_type` (varchar(10), CHECK: 'car', 'bike', or 'truck'), `model` (varchar(100)), `registration_number` (varchar(50), unique), `price_per_day` (int), `availability_status` (varchar(15), CHECK: 'available', 'rented', or 'maintenance')
+- **Constraints**: Registration number must be unique, vehicle type and availability status are constrained by CHECK constraints
 
 ### Bookings
 Tracks rental transactions and booking status.
-- **Primary Key**: `booking_id`
-- **Foreign Keys**: `user_id` → Users, `vehicle_id` → Vehicles
-- **Fields**: `start_date`, `end_date`, `booking_status` (pending/confirmed/completed/cancelled), `total_cost`
+- **Primary Key**: `booking_id` (SERIAL)
+- **Foreign Keys**: 
+  - `user_id` → Users (ON DELETE CASCADE)
+  - `vehicle_id` → Vehicles (ON DELETE RESTRICT)
+- **Fields**: `start_date` (DATE), `end_date` (DATE), `total_cost` (int), `booking_status` (varchar(10), CHECK: 'pending', 'confirmed', 'completed', or 'cancelled'), `created_at` (timestamp)
+- **Constraints**: End date must be greater than start date, booking status is constrained by CHECK constraint
 
 ## Relationships
 
@@ -51,7 +56,20 @@ Execute the queries in `queries.sql` against your database to:
 - Filter vehicles by type and availability
 - Analyze booking statistics per vehicle
 
+## Database Setup
+
+The database is designed for PostgreSQL. To set up the database:
+
+1. Create the database:
+   ```sql
+   CREATE DATABASE vehicle_rental_system;
+   ```
+
+2. Execute the DDL script to create tables with all constraints and relationships.
+
+3. Insert sample data (optional) to test the queries.
+
 ## Requirements
 
-- SQL-compatible database (MySQL, PostgreSQL, SQL Server, etc.)
+- PostgreSQL database
 - Database tables created according to the schema above
